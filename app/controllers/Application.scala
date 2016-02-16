@@ -1,10 +1,14 @@
 package controllers
 
-import java.io.{File, FileOutputStream}
+import java.util.Date
 import javax.inject.Inject
 
+import anorm.SqlParser._
+import anorm._
+import models.Kitten
+import play.api.Play.current
+import play.api.db.DB
 import play.api.libs.ws.WSClient
-import play.api.libs.ws.ning.NingWSResponse
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,22 +16,13 @@ import scala.concurrent.Future
 import scala.xml.Elem
 
 class Application @Inject()(ws: WSClient) extends Controller {
-
   def index = Action {
-    Ok(views.html.index("Your new application is ready."))
-  }
-
-  // cruft
-  private def fresh_cat(file: File): Boolean = file.isFile() && System.currentTimeMillis() - file.lastModified() < Application.freshness_seconds
-
-  // cruft
-  def write_cat(response: Future[NingWSResponse], file: File): Future[Array[Byte]] = response.map {
-    response: NingWSResponse => {
-      val stream = new FileOutputStream(file)
-      stream.write(response.bodyAsBytes)
-      stream.close()
-      response.bodyAsBytes
+    val no: Option[Int] = DB.withConnection { implicit c =>
+      val res: SqlQueryResult = SQL"Select count(source) from kitten".executeQuery()
+      res.as(scalar[Int].singleOpt)
     }
+    //val result: Boolean = SQL"Select 1".execute()
+    Ok(views.html.index("No. of kittens: " + no.get))
   }
 
   private def get_metacat(): Future[Elem] = {
@@ -50,23 +45,32 @@ class Application @Inject()(ws: WSClient) extends Controller {
     }
 
   def dynamic_kitten = Action.async {
-    val metacat = get_metacat()
-    metacat.flatMap {
-      xml => {
-        val image = xml \ "data" \ "images" \ "image"
+    Kitten.findFresh() match {
+      case Some(k) => Future(Ok(k.image).as("image/png"))
+      case None => {
+        val metacat = get_metacat()
+        metacat.flatMap {
+          xml => {
+            val image = xml \ "data" \ "images" \ "image"
 
-        val url = (image \ "url").text
-        val source = (image \ "source_url").text
+            val url = (image \ "url").text
+            val source = (image \ "source_url").text
 
-        val kitten: Future[Array[Byte]] = download_cat(url)
-        val fr: Future[Result] = kitten.map(bytes => Ok(bytes))
-        fr
+            val kitten: Future[Array[Byte]] = download_cat(url)
+            val fr: Future[Result] = kitten.map {
+              bytes => {
+                Kitten.insert(Kitten(source, bytes, new Date()))
+                Ok(bytes).as("image/png")
+              }
+            }
+            fr
+          }
+        }
       }
     }
   }
 }
 
 object Application {
-  val cache_filename = "/tmp/kittenproxy1.png"
-  val freshness_seconds = 10 * 60
+  val freshness_minutes = 1
 }
