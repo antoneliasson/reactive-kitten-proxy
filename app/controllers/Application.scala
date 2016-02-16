@@ -17,8 +17,9 @@ import scala.xml.Elem
 
 class Application @Inject()(ws: WSClient) extends Controller {
   def index = Action {
+    Kitten.clean()
     val kittens = Kitten.findAll()
-    Ok(views.html.index("No. of kittens on scratching post: " + kittens.length, kittens))
+    Ok(views.html.index("Current number of kittens on scratching post: " + kittens.length, kittens))
   }
 
   private def get_metacat(): Future[Elem] = {
@@ -68,6 +69,7 @@ class Application @Inject()(ws: WSClient) extends Controller {
   }
 
   def static_kitten(id: String) = Action {
+    Kitten.clean()
     val kitten = Kitten.find(id)
     kitten match {
       case Some(k) => Ok(k.image).as("image/png")
