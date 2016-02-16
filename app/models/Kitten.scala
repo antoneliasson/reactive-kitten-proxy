@@ -9,19 +9,20 @@ import play.api.Play.current
 import anorm._
 import anorm.SqlParser._
 
-case class Kitten(source: String, image: Array[Byte], date: Date)
+case class Kitten(id: String, source: String, image: Array[Byte], date: Date)
 
 object Kitten {
-  val mapping = str("source") ~
+  val mapping = str("id") ~
+    str("source") ~
     byteArray("image") ~
     date("date") map {
-    case source ~ image ~ date =>
-      Kitten(source, image, date)
+    case id ~ source ~ image ~ date =>
+      Kitten(id, source, image, date)
   }
 
-//  def findAll(): Seq[Kitten] = DB.withConnection { implicit c =>
-//    SQL"select * from kitten".as(Kitten.mapping.*)
-//  }
+  def findAll(): Seq[Kitten] = DB.withConnection { implicit c =>
+    SQL"select * from kitten order by date desc".as(Kitten.mapping.*)
+  }
 
   def findFresh(): Option[Kitten] = {
     clean()
@@ -31,9 +32,15 @@ object Kitten {
     }
   }
 
+  def find(id: String): Option[Kitten] = {
+    DB.withConnection { implicit c =>
+      SQL"select * from kitten where id=${id}".as(Kitten.mapping.singleOpt)
+    }
+  }
+
   def insert(kitten: Kitten): Unit = {
     DB.withConnection { implicit conn =>
-      SQL"insert into kitten(source, image, date) values (${kitten.source}, ${kitten.image}, ${kitten.date})".executeUpdate()
+      SQL"insert into kitten(id, source, image, date) values (${kitten.id}, ${kitten.source}, ${kitten.image}, ${kitten.date})".executeUpdate()
     }
   }
 

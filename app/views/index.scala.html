@@ -1,7 +1,15 @@
-@(message: String)
-
-@main("Welcome to Play") {
-
-    @play20.welcome(message)
-
+@(message: String, kittens: Seq[Kitten])@main("Reactive Kitten Proxy") {
+    <p>@message</p>
+    <p>Kittens stay on this particular scratching post for 24 hours before leaving for new adventures on the internets.</p>
+    <table>
+        @for(k <- kittens) {
+            <tr>
+                <td><img src="@routes.Application.static_kitten(k.id)" /></td>
+                <td>
+                    <p>Added on: @k.date</p>
+                    <p><a href="@k.source">Source</a></p>
+                </td>
+            </tr>
+        }
+        </table>
 }

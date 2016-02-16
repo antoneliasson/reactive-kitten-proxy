@@ -17,12 +17,8 @@ import scala.xml.Elem
 
 class Application @Inject()(ws: WSClient) extends Controller {
   def index = Action {
-    val no: Option[Int] = DB.withConnection { implicit c =>
-      val res: SqlQueryResult = SQL"Select count(source) from kitten".executeQuery()
-      res.as(scalar[Int].singleOpt)
-    }
-    //val result: Boolean = SQL"Select 1".execute()
-    Ok(views.html.index("No. of kittens: " + no.get))
+    val kittens = Kitten.findAll()
+    Ok(views.html.index("No. of kittens on scratching post: " + kittens.length, kittens))
   }
 
   private def get_metacat(): Future[Elem] = {
@@ -53,13 +49,14 @@ class Application @Inject()(ws: WSClient) extends Controller {
           xml => {
             val image = xml \ "data" \ "images" \ "image"
 
+            val id = (image \ "id").text
             val url = (image \ "url").text
             val source = (image \ "source_url").text
 
             val kitten: Future[Array[Byte]] = download_cat(url)
             val fr: Future[Result] = kitten.map {
               bytes => {
-                Kitten.insert(Kitten(source, bytes, new Date()))
+                Kitten.insert(Kitten(id, source, bytes, new Date()))
                 Ok(bytes).as("image/png")
               }
             }
@@ -67,6 +64,14 @@ class Application @Inject()(ws: WSClient) extends Controller {
           }
         }
       }
+    }
+  }
+
+  def static_kitten(id: String) = Action {
+    val kitten = Kitten.find(id)
+    kitten match {
+      case Some(k) => Ok(k.image).as("image/png")
+      case None => NotFound
     }
   }
 }
