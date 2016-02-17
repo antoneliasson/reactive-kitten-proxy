@@ -79,5 +79,6 @@ class Application @Inject()(ws: WSClient) extends Controller {
 }
 
 object Application {
-  val freshness_minutes = 1
+  val freshness_minutes = 10
+  val clean_hours = 24
 }

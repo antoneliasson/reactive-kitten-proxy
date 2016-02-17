@@ -46,7 +46,7 @@ object Kitten {
 
   def clean(): Unit = {
     DB.withConnection { implicit c =>
-      SQL"delete from kitten where date < DATEADD('MINUTE', -5, NOW())".execute()
+      SQL"delete from kitten where date < DATEADD('HOUR', -${Application.clean_hours}, NOW())".execute()
     }
   }
 }
