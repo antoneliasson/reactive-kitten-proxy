@@ -12,7 +12,45 @@ There is also a simple web application that presents all the images that have be
 
 ## Installation
 
-TODO
+Until binaries are provided, you will need the full development environment and build your own. Install [Typesafe Activator](https://www.typesafe.com/activator/download). Pull down this repository and cd into it. Start `activator`. To run the application in development mode type `run`. To build Debian packages type `debian:packageBin`. The packages have been tested in Debian 8 (Jessie).
+
+By default the application uses an in-memory database (since the database is just a cache anyway). Its contents are cleared on every shutdown so every time the application is started, the database needs to be initialized with a table. This is done automatically in production mode. In development mode you simply open the application in a web browser and click *"Apply this script now!"* when the message *"Database 'default' needs evolution!"* is shown.
+
+Example:
+
+```sh
+[5.0.7]anton@balder:~/git/reactive-kitten-proxy> activator
+[info] Loading global plugins from /home/anton/.sbt/0.13/plugins
+[info] Updating {file:/home/anton/.sbt/0.13/plugins/}global-plugins...
+[info] Resolving org.fusesource.jansi#jansi;1.4 ...
+[info] Done updating.
+[info] Loading project definition from /home/anton/git/reactive-kitten-proxy/project
+[info] Updating {file:/home/anton/git/reactive-kitten-proxy/project/}reactive-kitten-proxy-build...
+[info] Resolving org.fusesource.jansi#jansi;1.4 ...
+[info] Done updating.
+[info] Set current project to reactive-kitten-proxy (in build file:/home/anton/git/reactive-kitten-proxy/)
+[reactive-kitten-proxy] $ run
+
+--- (Running the application, auto-reloading is enabled) ---
+
+[info] p.c.s.NettyServer - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
+
+(Server started, use Ctrl+D to stop and go back to the console...)
+
+[info] - application - Creating Pool for datasource 'default'
+[info] - play.api.db.DefaultDBApi - Database [default] connected at jdbc:h2:mem:play
+[info] - play.api.Play - Application started (Dev)
+[info] - application - Shutting down connection pool.
+
+[success] Total time: 12 s, completed Feb 21, 2016 10:54:38 AM
+[reactive-kitten-proxy] $ debian:packageBin
+[info] Wrote /home/anton/git/reactive-kitten-proxy/target/scala-2.11/reactive-kitten-proxy_2.11-1.0.1.pom
+[info] Building debian package with native implementation
+[info] dpkg-deb: building package `reactive-kitten-proxy' in `../reactive-kitten-proxy_1.0.1_all.deb'.
+[success] Total time: 13 s, completed Feb 21, 2016 10:55:39 AM
+```
+
+The Debian package installs a systemd service descriptor, allowing the application to be easily controlled using `systemctl {status,start,stop,enable,disable} reactive-kitten-proxy.service`.
 
 ## Screenshot
 
