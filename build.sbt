@@ -1,6 +1,6 @@
 name := """reactive-kitten-proxy"""
 
-version := "1.0"
+version := "1.0.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, DebianPlugin)
 
@@ -30,9 +30,9 @@ packageDescription :=
     | to provide a banner for the server welcome message in Killing Floor 2 (or
     | any other game server with a welcome screen). Images are cached for a few
     | (configurable) minutes before they are replaced by a new cat image.
-    | There is also a simple web site that presents all the images that have
-    | been used for the last (configurable) 24 hours along with its source URL.
-    | Useful if a user finds an image particularly funny and would like to find
+    | There is also a simple web application that presents all the images that have
+    | been shown during the last (configurable) 24 hours along with their source URL.
+    | Useful if a visitor finds an image particularly funny and would like to find
     | out where it came from.""".stripMargin
 
 import com.typesafe.sbt.packager.archetypes.ServerLoader
