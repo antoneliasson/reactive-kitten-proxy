@@ -16,7 +16,9 @@ Until binaries are provided, you will need the full development environment and 
 
 By default the application uses an in-memory database (since the database is just a cache anyway). Its contents are cleared on every shutdown so every time the application is started, the database needs to be initialized with a table. This is done automatically in production mode. In development mode you simply open the application in a web browser and click *"Apply this script now!"* when the message *"Database 'default' needs evolution!"* is shown.
 
-The application runs on TCP port 9000 by default. To make it run on port 80 but still run as an unprivilegied user you could set up an [Apache reverse proxy](https://httpd.apache.org/docs/current/mod/mod_proxy.html#forwardreverse) or similar.
+The application runs on TCP port 9000 by default. To make it run on port 80 but still run as an unprivileged user you could set up an [Apache reverse proxy](https://httpd.apache.org/docs/current/mod/mod_proxy.html#forwardreverse) or similar.
+
+If you have an API key for The Cat API ([request one here](http://thecatapi.com/api-key-registration.html)) you can enter it in your application.ini (usually located in /etc/reactive-kitten-proxy) after installing. If not, the application will still work, but you will only get access to the first 1000 images, as per [The Cat API docs](http://thecatapi.com/docs.html).
 
 Example:
 
