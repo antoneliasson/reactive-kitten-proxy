@@ -43,7 +43,7 @@ class Application @Inject()(ws: WSClient) extends Controller {
 
   def dynamic_kitten = Action.async {
     Kitten.findFresh() match {
-      case Some(k) => Future(Ok(k.image).as("image/png"))
+      case Some(k) => Future(Ok(k.image).as("image/png").withHeaders(CONTENT_LENGTH -> k.image.length.toString))
       case None => {
         val metacat = get_metacat()
         metacat.flatMap {
@@ -58,7 +58,7 @@ class Application @Inject()(ws: WSClient) extends Controller {
             val fr: Future[Result] = kitten.map {
               bytes => {
                 Kitten.insert(Kitten(id, source, bytes, new Date()))
-                Ok(bytes).as("image/png")
+                Ok(bytes).as("image/png").withHeaders(CONTENT_LENGTH -> bytes.length.toString)
               }
             }
             fr
