@@ -13,6 +13,7 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.sys.SystemProperties
 import scala.xml.Elem
 
 class Application @Inject()(ws: WSClient) extends Controller {
@@ -23,8 +24,10 @@ class Application @Inject()(ws: WSClient) extends Controller {
   }
 
   private def get_metacat(): Future[Elem] = {
+    val prop = new SystemProperties()
+    val api_key = prop.getOrElse("kittenproxy.apikey", "")
     val body: Future[Elem] = ws
-      .url("http://thecatapi.com/api/images/get?format=xml&type=png&size=med")
+      .url(s"http://thecatapi.com/api/images/get?format=xml&type=png&size=med&api_key=$api_key")
       .get()
       .map {
         response => {
